@@ -1,8 +1,21 @@
 import bpy
 
 
-class ACS_PT_GraphEditorPanel(bpy.types.Panel):
-    bl_idname = "ACS_PT_GraphEditorPanel"
+
+def actions_settings_callback (scene, context):
+    items = [('EMPTY', '_NONE_', '')]
+    for action in bpy.data.actions:
+        items.append((action.name, action.name, ""))
+    return items
+
+
+
+PROPS = [ 
+    ("master_action", bpy.props.EnumProperty(items = actions_settings_callback, name = "Tpose Action")),
+]
+
+class ACS_PT_MainPanel(bpy.types.Panel):
+    bl_idname = "ACS_PT_MainPanel"
     bl_space_type = 'GRAPH_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Anim Curve Sorter"
@@ -14,10 +27,23 @@ class ACS_PT_GraphEditorPanel(bpy.types.Panel):
         col = box.column(align = True)
         row = col.row (align =True)
 
-        row.operator("animcurvesort.alphabetise_all", text = "Sort all alphabetically")
+        row.operator("animcurvesort.alphabetise_all", text = "Sort All Alphabetically")
+        col = box.column(align = True)
+        row = col.row (align =True)
 
+        row.label(text = "Master Action")
+        row.label(text = "", icon = "ACTION")
+        row = col.row (align =True)
+        row.prop(context.scene, "master_action", text = "")
 
-CLASSES =  [ACS_PT_GraphEditorPanel]
+        col = box.column(align = True)
+        row = col.row (align =True)
+        row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All")
+
+CLASSES =  [ACS_PT_MainPanel]
+
+for (prop_name, prop_value) in PROPS:
+    setattr(bpy.types.Scene, prop_name, prop_value)
 
 def register_ui():
     for klass in CLASSES:
@@ -25,7 +51,7 @@ def register_ui():
 
 def unregister_ui():
     for klass in CLASSES:
-        bpy.utils.register_class(klass)
+        bpy.utils.unregister_class(klass)
 
 
 
