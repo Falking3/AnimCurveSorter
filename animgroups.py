@@ -1,5 +1,7 @@
 import bpy
 
+
+
 for action in bpy.data.actions:
     group_list = []
     for grp in action.layers[0].strips[0].channelbag(action.slots[0]).groups:
