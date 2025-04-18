@@ -38,7 +38,15 @@ class ACS_PT_MainPanel(bpy.types.Panel):
 
         col = box.column(align = True)
         row = col.row (align =True)
-        row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All")
+        props = row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All")
+        props.use_selected = False
+
+        col = box.column(align = True)
+        row = col.row (align =True)
+        props = row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to Active Action")
+        props.use_selected = True
+
+
 
 CLASSES =  [ACS_PT_MainPanel]
 

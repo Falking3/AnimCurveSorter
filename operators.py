@@ -35,6 +35,8 @@ class CopyGroupstoAll(bpy.types.Operator):
 
     def execute(self, context):
 
+        use_selected : bpy.props.BoolProperty(name = "UseSelected?", default = False)
+
         master_groups = []
         master_action = bpy.data.actions[0]
         for grp in master_action.layers[0].strips[0].channelbag(master_action.slots[0]).groups:
@@ -42,6 +44,11 @@ class CopyGroupstoAll(bpy.types.Operator):
             
         missing_actions_groups_dict = {}
         unreferenced_actions_groups_dict = {}
+        if use_selected == False:
+            actions = bpy.data.actions
+        else:
+            actions = [bpy.context.active_object.animation_data.action]
+
         for action in bpy.data.actions:
             if action == master_action:
                 continue
@@ -93,7 +100,7 @@ class CopyGroupstoAll(bpy.types.Operator):
                 print("       - '"+group+"'")
 
         return {'FINISHED'}
-        
+
 
 CLASSES =  [AlphabetiseAll, CopyGroupstoAll]
 
