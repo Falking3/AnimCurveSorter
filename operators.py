@@ -7,9 +7,16 @@ class AlphabetiseAll(bpy.types.Operator):
     bl_label = "AlphabetiseAll"
     bl_options = {"REGISTER", "UNDO"}
 
+    use_selected: bpy.props.BoolProperty(name = "UseSelected?", default = False)
+
     def execute(self, context):
 
-        for action in bpy.data.actions:
+        if self.use_selected == False:
+            actions = bpy.data.actions
+        else:
+            actions = [bpy.context.active_object.animation_data.action]
+
+        for action in actions:
             group_list = []
             for grp in action.layers[0].strips[0].channelbag(action.slots[0]).groups:
                 group_list.append(grp.name)
@@ -40,7 +47,7 @@ class CopyGroupstoAll(bpy.types.Operator):
 
 
         master_groups = []
-        master_action = bpy.data.actions[0]
+        master_action = bpy.data.actions[bpy.context.scene.master_action]
         for grp in master_action.layers[0].strips[0].channelbag(master_action.slots[0]).groups:
             master_groups.append(grp.name)
             
@@ -51,7 +58,7 @@ class CopyGroupstoAll(bpy.types.Operator):
         else:
             actions = [bpy.context.active_object.animation_data.action]
 
-        for action in bpy.data.actions:
+        for action in actions:
             if action == master_action:
                 continue
             unreferenced_groups = []

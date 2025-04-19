@@ -27,7 +27,13 @@ class ACS_PT_MainPanel(bpy.types.Panel):
         col = box.column(align = True)
         row = col.row (align =True)
 
-        row.operator("animcurvesort.alphabetise_all", text = "Sort All Alphabetically")
+        props = row.operator("animcurvesort.alphabetise_all", text = "Sort All Alphabetically")
+        props.use_selected = False
+        col = box.column(align = True)
+        row = col.row (align =True)
+
+        props = row.operator("animcurvesort.alphabetise_all", text = "Sort Active Action Alphabetically")
+        props.use_selected = True
         col = box.column(align = True)
         row = col.row (align =True)
 
