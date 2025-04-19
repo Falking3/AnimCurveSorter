@@ -33,9 +33,11 @@ class CopyGroupstoAll(bpy.types.Operator):
     bl_label = "CopyGroupstoAll"
     bl_options = {"REGISTER", "UNDO"}
 
+    use_selected: bpy.props.BoolProperty(name = "UseSelected?", default = False)
+
     def execute(self, context):
 
-        use_selected : bpy.props.BoolProperty(name = "UseSelected?", default = False)
+
 
         master_groups = []
         master_action = bpy.data.actions[0]
@@ -44,7 +46,7 @@ class CopyGroupstoAll(bpy.types.Operator):
             
         missing_actions_groups_dict = {}
         unreferenced_actions_groups_dict = {}
-        if use_selected == False:
+        if self.use_selected == False:
             actions = bpy.data.actions
         else:
             actions = [bpy.context.active_object.animation_data.action]
