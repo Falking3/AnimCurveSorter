@@ -1,5 +1,13 @@
 import bpy
 
+def readd_curve(action, grp_ref):
+    curves = []
+    for curve in grp_ref.channels:
+        curves.append(curve)
+    action.groups.remove(grp_ref)
+    newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(grp_ref.name)
+    for curve in curves:
+        curve.group = newgrp
 
 class AlphabetiseAll(bpy.types.Operator):
     """Sorts curve groups in all actions by alphabetical order"""
@@ -22,18 +30,67 @@ class AlphabetiseAll(bpy.types.Operator):
                 group_list.append(grp.name)
             sorted_group_list = sorted(group_list, key=str.casefold)
             for grp in sorted_group_list:
-                curves = []
                 grp_ref = action.layers[0].strips[0].channelbag(action.slots[0]).groups[grp]
-                for curve in grp_ref.channels:
-                    curves.append(curve)
-                action.groups.remove(grp_ref)
-                newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(grp)
-                for curve in curves:
-                    curve.group = newgrp
+                readd_curve(action, grp_ref)
 
         return {'FINISHED'}
 
+class SortbyRigHierarchy(bpy.types.Operator):
+    """Sorts curve groups in all actions by their order in the rig hierarchy"""
+    bl_idname = "animcurvesort.sort_by_rig"
+    bl_label = "SortbyRigHierarchy"
+    bl_options = {"REGISTER", "UNDO"}
 
+    def execute(self, context):    
+
+        root_bones = []
+        ordered_bones = []
+
+        for bone in bpy.context.active_object.pose.bones:
+            if bone.parent == None:
+                root_bones.append(bone)
+                ordered_bones.append(bone.name)
+
+        for bone in root_bones:
+            path_finished = False
+            current_bone = bone
+                
+            while path_finished == False:
+                valid_child_found = False
+                for child in current_bone.children:
+                    if child.name not in ordered_bones:
+                        ordered_bones.append(child.name)                
+                    if len(child.children)>0:
+                        if child.children[0].name not in ordered_bones:
+                            current_bone = child
+                            valid_child_found = True
+                            break
+                
+                if valid_child_found == False:
+                    if current_bone.parent == None:
+                        path_finished = True
+                        break
+                    else:
+                        current_bone = current_bone.parent
+
+
+        for action in bpy.data.actions:
+            non_rig_groups = []
+            for group in action.layers[0].strips[0].channelbag(action.slots[0]).groups:
+                if group.name not in ordered_bones:
+                    non_rig_groups.append(group)
+            for bone_name in ordered_bones:
+                try:
+                    grp_ref = action.layers[0].strips[0].channelbag(action.slots[0]).groups[bone_name]
+                except: 
+                    continue
+                readd_curve(action,grp_ref)
+            for group in non_rig_groups:
+                readd_curve(action,group)
+
+        return {'FINISHED'}
+
+        
 class CopyGroupstoAll(bpy.types.Operator):
     """Copies the curve group layout from the master action to all actions"""
     bl_idname = "animcurvesort.copy_groups_to_all"
@@ -72,7 +129,6 @@ class CopyGroupstoAll(bpy.types.Operator):
                     except:
                         unreferenced_actions_groups_dict[action.name] = [grp.name]
             for grp in master_groups:
-                curves = []
                 try:
                     grp_ref = action.layers[0].strips[0].channelbag(action.slots[0]).groups[grp]
                 except: 
@@ -81,20 +137,10 @@ class CopyGroupstoAll(bpy.types.Operator):
                     except:
                         missing_actions_groups_dict[action.name] = [grp]
                     continue
-                for curve in grp_ref.channels:
-                    curves.append(curve)
-                action.groups.remove(grp_ref)
-                newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(grp)
-                for curve in curves:
-                    curve.group = newgrp
+                readd_curve(action, grp_ref)
             for grp_ref in unreferenced_groups:
-                grp = grp_ref.name
-                for curve in grp_ref.channels:
-                    curves.append(curve)
-                action.groups.remove(grp_ref)
-                newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(grp)
-                for curve in curves:
-                    curve.group = newgrp 
+                 readd_curve(action, grp_ref)               
+
          
         print("\n ----- Actions missing groups from the master action: -----")           
         for key in missing_actions_groups_dict.keys():
@@ -110,8 +156,13 @@ class CopyGroupstoAll(bpy.types.Operator):
 
         return {'FINISHED'}
 
+#fix orphaned curves
+#group cprops
 
-CLASSES =  [AlphabetiseAll, CopyGroupstoAll]
+
+
+
+CLASSES =  [AlphabetiseAll, CopyGroupstoAll, SortbyRigHierarchy]
 
 def register_operators():
     for klass in CLASSES:

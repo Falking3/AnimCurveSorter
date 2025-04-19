@@ -19,24 +19,21 @@ class ACS_PT_MainPanel(bpy.types.Panel):
     bl_space_type = 'GRAPH_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Anim Curve Sorter"
-    bl_label = 'Animation'
+    bl_label = 'Sort Curve Groups'
 
     def draw(self, context):
         layout = self.layout
         box = layout.box()
         col = box.column(align = True)
-        row = col.row (align =True)
-
-        props = row.operator("animcurvesort.alphabetise_all", text = "Sort All Alphabetically")
+        props = col.operator("animcurvesort.alphabetise_all", text = "Sort All Actions Alphabetically")
         props.use_selected = False
         col = box.column(align = True)
-        row = col.row (align =True)
-
-        props = row.operator("animcurvesort.alphabetise_all", text = "Sort Active Action Alphabetically")
+        props = col.operator("animcurvesort.alphabetise_all", text = "Sort Active Action Alphabetically")
         props.use_selected = True
+
+        box = layout.box()
         col = box.column(align = True)
         row = col.row (align =True)
-
         row.label(text = "Master Action")
         row.label(text = "", icon = "ACTION")
         row = col.row (align =True)
@@ -44,7 +41,7 @@ class ACS_PT_MainPanel(bpy.types.Panel):
 
         col = box.column(align = True)
         row = col.row (align =True)
-        props = row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All")
+        props = row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All Actions")
         props.use_selected = False
 
         col = box.column(align = True)
@@ -52,6 +49,11 @@ class ACS_PT_MainPanel(bpy.types.Panel):
         props = row.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to Active Action")
         props.use_selected = True
 
+        box = layout.box()
+        col = box.column(align = True)
+        row = col.row (align =True)
+        props = col.operator("animcurvesort.sort_by_rig", text = "Sort All Actions by Rig")
+        #props.use_selected = False        
 
 
 CLASSES =  [ACS_PT_MainPanel]
