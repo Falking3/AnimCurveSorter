@@ -1,11 +1,13 @@
 import bpy
+import re
 
 def readd_curve(action, grp_ref):
     curves = []
     for curve in grp_ref.channels:
         curves.append(curve)
+    name = grp_ref.name
     action.groups.remove(grp_ref)
-    newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(grp_ref.name)
+    newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(name)
     for curve in curves:
         curve.group = newgrp
 
@@ -15,11 +17,11 @@ class AlphabetiseAll(bpy.types.Operator):
     bl_label = "AlphabetiseAll"
     bl_options = {"REGISTER", "UNDO"}
 
-    use_selected: bpy.props.BoolProperty(name = "UseSelected?", default = False)
 
     def execute(self, context):
 
-        if self.use_selected == False:
+        print("\n\n\n AlphabetiseAll")
+        if context.scene.use_selected == False:
             actions = bpy.data.actions
         else:
             actions = [bpy.context.active_object.animation_data.action]
@@ -90,18 +92,68 @@ class SortbyRigHierarchy(bpy.types.Operator):
 
         return {'FINISHED'}
 
-        
+class GroupOrphanedCurves(bpy.types.Operator):
+    """Takes orphaned bone curves and puts them in a group"""
+    bl_idname = "animcurvesort.group_orphaned_curves"
+    bl_label = "GroupOrphanedCurves"
+    bl_options = {"REGISTER", 'UNDO'}
+
+    def execute(self, context):
+
+        if bpy.context.scene.use_selected == True:
+            actions = [bpy.context.active_object.animation_data.action]
+        else:
+            actions = bpy.data.actions
+
+        for action in actions:
+            for fcurve in action.layers[0].strips[0].channelbag(action.slots[0]).fcurves:
+                if fcurve.group == None:
+                    if "pose.bones" in fcurve.data_path:
+                        #parse datapath for bonename
+                        bonename = re.findall('pose.bones\["(.*?)\"]', fcurve.data_path)
+                        bonename = bonename[0]
+                        try:
+                            fcurve.group = action.layers[0].strips[0].channelbag(action.slots[0]).groups[bonename] #if it already exists, re-add it
+                        except:
+                            action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(bonename) #otherwise make a new one
+                            fcurve.group = action.layers[0].strips[0].channelbag(action.slots[0]).groups[bonename]
+
+        return {'FINISHED'}
+
+
+class GroupCustomProperties(bpy.types.Operator):
+    """Groups custom properties curves that don't belong to a bone under their own group """
+    bl_idname = "animcurvesort.group_custom_properties"
+    bl_label = "GroupCustomProperties"
+    bl_options = {"REGISTER", 'UNDO'}
+
+    def execute(self, context):
+
+        if bpy.context.scene.use_selected == True:
+            actions = [bpy.context.active_object.animation_data.action]
+        else:
+            actions = bpy.data.actions
+
+        for action in actions:
+            for fcurve in action.layers[0].strips[0].channelbag(action.slots[0]).fcurves:
+                if fcurve.group == None:
+                    if "pose.bones" not in fcurve.data_path:
+                        try:
+                            fcurve.group = action.layers[0].strips[0].channelbag(action.slots[0]).groups["Custom Properties"]
+                        except:
+                            action.layers[0].strips[0].channelbag(action.slots[0]).groups.new("Custom Properties")
+                            fcurve.group = action.layers[0].strips[0].channelbag(action.slots[0]).groups["Custom Properties"]
+
+        return {'FINISHED'}
+
 class CopyGroupstoAll(bpy.types.Operator):
     """Copies the curve group layout from the master action to all actions"""
     bl_idname = "animcurvesort.copy_groups_to_all"
     bl_label = "CopyGroupstoAll"
     bl_options = {"REGISTER", "UNDO"}
 
-    use_selected: bpy.props.BoolProperty(name = "UseSelected?", default = False)
 
     def execute(self, context):
-
-
 
         master_groups = []
         master_action = bpy.data.actions[bpy.context.scene.master_action]
@@ -110,7 +162,7 @@ class CopyGroupstoAll(bpy.types.Operator):
             
         missing_actions_groups_dict = {}
         unreferenced_actions_groups_dict = {}
-        if self.use_selected == False:
+        if context.scene.use_selected == False:
             actions = bpy.data.actions
         else:
             actions = [bpy.context.active_object.animation_data.action]
@@ -156,13 +208,9 @@ class CopyGroupstoAll(bpy.types.Operator):
 
         return {'FINISHED'}
 
-#fix orphaned curves
-#group cprops
 
 
-
-
-CLASSES =  [AlphabetiseAll, CopyGroupstoAll, SortbyRigHierarchy]
+CLASSES =  [AlphabetiseAll, CopyGroupstoAll, SortbyRigHierarchy, GroupCustomProperties, GroupOrphanedCurves]
 
 def register_operators():
     for klass in CLASSES:
