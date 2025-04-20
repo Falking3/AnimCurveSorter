@@ -5,7 +5,7 @@ schema_version = "1.0.0"
 id = "AnimCurveSorter"
 version = "1.0.0"
 name = "Anim Curve Sorter"
-tagline = "Easily organise your animation curves!"
+tagline = "Easily organise your animation curves"
 maintainer = "Duncan Readle <duncanreadle.20@gmail.com>"
 # Supported types: "add-on", "theme"
 type = "add-on"
@@ -25,7 +25,7 @@ blender_version_min = "4.4.0"
 # License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
 # https://docs.blender.org/manual/en/dev/advanced/extensions/licenses.html
 license = [
-  "SPDX:GPL-2.0-or-later",
+  "SPDX:GPL-3.0-or-later",
 ]
 # Optional: required by some licenses.
 # copyright = [
