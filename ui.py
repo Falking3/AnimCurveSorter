@@ -1,7 +1,5 @@
 import bpy
 
-
-
 def actions_settings_callback (scene, context):
     items = [('EMPTY', '_NONE_', '')]
     for action in bpy.data.actions:
@@ -38,7 +36,6 @@ def panel_layout(self, context):
     col.operator("animcurvesort.group_custom_properties", text = "Group Non-Bone Custom Properties", icon = "PROPERTIES")
 
 
-
 PROPS = [ 
     ("master_action", bpy.props.EnumProperty(items = actions_settings_callback, name = "Master Action")),
     ("use_selected",  bpy.props.BoolProperty(name = "UseSelected?", default = False)),
@@ -56,7 +53,7 @@ class ACS_PT_GraphPanel(bpy.types.Panel):
 
 class ACS_PT_ActionPanel(bpy.types.Panel):
     bl_idname = "ACS_PT_ActionPanel"
-    bl_space_type = 'ACTION_EDITOR'
+    bl_space_type = 'DOPESHEET_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Anim Curve Sorter"
     bl_label = 'Sort Curve Groups'

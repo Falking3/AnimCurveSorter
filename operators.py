@@ -11,6 +11,17 @@ def readd_curve(action, grp_ref):
     for curve in curves:
         curve.group = newgrp
 
+def check_active_action(self):
+    if bpy.context.active_object == None:
+        self.report({"ERROR"}, "There is no active object!") 
+        return False
+    if bpy.context.active_object.animation_data == None or bpy.context.active_object.animation_data.action == None :
+        self.report({"ERROR"}, "Active object has no action assigned, please assign one") 
+        return False
+    else:
+        return True
+
+
 class AlphabetiseAll(bpy.types.Operator):
     """Sorts curve groups in all actions by alphabetical order"""
     bl_idname = "animcurvesort.alphabetise_all"
@@ -20,10 +31,11 @@ class AlphabetiseAll(bpy.types.Operator):
 
     def execute(self, context):
 
-        print("\n\n\n AlphabetiseAll")
         if context.scene.use_selected == False:
             actions = bpy.data.actions
         else:
+            if check_active_action(self) == False:
+                return {'CANCELLED'}
             actions = [bpy.context.active_object.animation_data.action]
 
         for action in actions:
@@ -48,6 +60,12 @@ class SortbyRigHierarchy(bpy.types.Operator):
         root_bones = []
         ordered_bones = []
 
+        if bpy.context.active_object == None:
+            self.report({"ERROR"}, "There is no active object!") 
+            return {'CANCELLED'}
+        if bpy.context.active_object.type != "ARMATURE":
+            self.report({'ERROR'}, "Active object is not an armature! Please select the armature you want to sort by")
+            return {'CANCELLED'}
         for bone in bpy.context.active_object.pose.bones:
             if bone.parent == None:
                 root_bones.append(bone)
@@ -75,8 +93,14 @@ class SortbyRigHierarchy(bpy.types.Operator):
                     else:
                         current_bone = current_bone.parent
 
+        if bpy.context.scene.use_selected == True:
+            if check_active_action(self) == False:
+                return {'CANCELLED'}
+            actions = [bpy.context.active_object.animation_data.action]
+        else:
+            actions = bpy.data.actions
 
-        for action in bpy.data.actions:
+        for action in actions:
             non_rig_groups = []
             for group in action.layers[0].strips[0].channelbag(action.slots[0]).groups:
                 if group.name not in ordered_bones:
@@ -101,6 +125,8 @@ class GroupOrphanedCurves(bpy.types.Operator):
     def execute(self, context):
 
         if bpy.context.scene.use_selected == True:
+            if check_active_action(self) == False:
+                return {'CANCELLED'}
             actions = [bpy.context.active_object.animation_data.action]
         else:
             actions = bpy.data.actions
@@ -130,6 +156,8 @@ class GroupCustomProperties(bpy.types.Operator):
     def execute(self, context):
 
         if bpy.context.scene.use_selected == True:
+            if check_active_action(self) == False:
+                return {'CANCELLED'}
             actions = [bpy.context.active_object.animation_data.action]
         else:
             actions = bpy.data.actions
@@ -156,7 +184,12 @@ class CopyGroupstoAll(bpy.types.Operator):
     def execute(self, context):
 
         master_groups = []
-        master_action = bpy.data.actions[bpy.context.scene.master_action]
+        try:
+            master_action = bpy.data.actions[bpy.context.scene.master_action]
+        except:
+            self.report({'ERROR'}, "No action assigned to copy groups from!")
+            return {'CANCELLED'}
+            
         for grp in master_action.layers[0].strips[0].channelbag(master_action.slots[0]).groups:
             master_groups.append(grp.name)
             
@@ -165,6 +198,8 @@ class CopyGroupstoAll(bpy.types.Operator):
         if context.scene.use_selected == False:
             actions = bpy.data.actions
         else:
+            if check_active_action(self) == False:
+                return {'CANCELLED'}
             actions = [bpy.context.active_object.animation_data.action]
 
         for action in actions:
