@@ -1,10 +1,11 @@
-import importlib
-import bpy
+if "bpy" in locals():
+    import importlib
+    for mod in [operators, ui]:
+        importlib.reload(mod)
+else:
+    import bpy
+    from. import (operators, ui)
 
-if "operators" in locals():
-    importlib.reload(operators)
-if "ui" in locals():
-    importlib.reload(ui)
 
 
 def register():

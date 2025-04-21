@@ -14,12 +14,12 @@ def panel_layout(self, context):
 
     box = layout.box()
     col = box.column(align = True)
-    col.operator("animcurvesort.alphabetise_all", text = "Sort All Actions Alphabetically", icon = "SORTALPHA")
-    col.operator("animcurvesort.sort_by_rig", text = "Sort All Actions by Rig Hierarchy", icon = "OUTLINER_OB_ARMATURE")
+    col.operator("anim.alphabetise_all", text = "Sort All Actions Alphabetically", icon = "SORTALPHA")
+    col.operator("anim.sort_by_rig", text = "Sort All Actions by Rig Hierarchy", icon = "OUTLINER_OB_ARMATURE")
 
     box = layout.box()
     col = box.column(align = True)
-    col.operator("animcurvesort.copy_groups_to_all", text = "Copy Groups to All Actions", icon = "COPYDOWN")
+    col.operator("anim.copy_groups_to_all", text = "Copy Groups to All Actions", icon = "COPYDOWN")
 
     col = box.column(align = True)
     row = col.row (align =True)
@@ -32,8 +32,8 @@ def panel_layout(self, context):
 
     box = layout.box()
     col = box.column(align = True)
-    col.operator("animcurvesort.group_orphaned_curves", text = "Group Orphaned Curves", icon = "FCURVE")
-    col.operator("animcurvesort.group_custom_properties", text = "Group Non-Bone Custom Properties", icon = "PROPERTIES")
+    col.operator("anim.group_orphaned_curves", text = "Group Orphaned Curves", icon = "FCURVE")
+    col.operator("anim.group_custom_properties", text = "Group Non-Bone Custom Properties", icon = "PROPERTIES")
 
 
 PROPS = [ 
