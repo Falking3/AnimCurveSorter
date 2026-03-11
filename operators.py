@@ -6,7 +6,7 @@ def readd_curve(action, grp_ref):
     for curve in grp_ref.channels:
         curves.append(curve)
     name = grp_ref.name
-    action.groups.remove(grp_ref)
+    action.layers[0].strips[0].channelbag(action.slots[0]).groups.remove(grp_ref)
     newgrp = action.layers[0].strips[0].channelbag(action.slots[0]).groups.new(name)
     for curve in curves:
         curve.group = newgrp
