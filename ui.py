@@ -11,6 +11,8 @@ def panel_layout(self, context):
     box = layout.box()
     col = box.column(align = True)
     col.prop(bpy.context.scene, "use_selected", text = "Apply Only to Active Action?")
+    col.prop(bpy.context.scene, "channel_sort_order", text = "Channel Order")
+    col.operator("anim.sort_channels_only", text = "Sort Channels in Groups Only", icon = "ARROW_LEFTRIGHT")
 
     box = layout.box()
     col = box.column(align = True)
@@ -36,9 +38,17 @@ def panel_layout(self, context):
     col.operator("anim.group_custom_properties", text = "Group Non-Bone Custom Properties", icon = "PROPERTIES")
 
 
-PROPS = [ 
+CHANNEL_SORT_ITEMS = [
+    ("NONE", "None (Keep Original)", "Do not sort individual channels within groups"),
+    ("TRS", "TRS (Loc -> Rot -> Scale)", "Sort channels by Location, Rotation, Scale"),
+    ("AXIS", "Axis First (X -> Y -> Z)", "Sort channels by Axis index"),
+    ("ALPHA", "Alphabetical", "Sort channels alphabetically by data path"),
+]
+
+PROPS = [
     ("master_action", bpy.props.EnumProperty(items = actions_settings_callback, name = "Master Action")),
-    ("use_selected",  bpy.props.BoolProperty(name = "UseSelected?", default = False)),
+    ("use_selected",  bpy.props.BoolProperty(name = "UseSelected?", default = True)),
+    ("channel_sort_order", bpy.props.EnumProperty(items = CHANNEL_SORT_ITEMS, name = "Channel Sort Order", default = "TRS")),
 ]
 
 class ACS_PT_GraphPanel(bpy.types.Panel):
